@@ -34,6 +34,7 @@ def save_accounts_to_file():
 
 
 def account_ver():
+    process_scheduled_transactions()
     print("welcome to bank daniel's. before continuing, we will have to verify your account")
     while True:
         try:
@@ -140,11 +141,21 @@ def menu(acc_number):
         if acc_number == 1000:
             print("to see accounts report - enter 0")
             print("to see transactions_to_execute - enter 1")
+            print("to see transaction_history - enter 2")
+            print("to exit - enter 9")
 
             manager_choice = input("")
             match manager_choice:
                 case "0":
-                    acc_report()
+                    acc_report(acc_number)
+                case "1":
+                    transaction_report()
+                case "2":
+                    transaction_history(acc_number)
+                case "9":
+                    print("have a good day")
+                case _:
+                    print("Invalid option, please try again.")
         else:
             print("to check your balance - enter 1")
             print("to make a transaction - enter 2")
@@ -161,7 +172,7 @@ def menu(acc_number):
                 case "3":
                     check_transaction(acc_number)
                 case "4":
-                    acc_report()
+                    acc_report(acc_number)
                 case "9":
                     print("have a good day, thanks for choosing Bank Daniel's(™)")
                     return
@@ -169,9 +180,46 @@ def menu(acc_number):
                     print("Invalid option, please try again.")
 
 
+def acc_report(acc_number):
+    # Report for a specific account
+    if acc_number in bank_accounts and acc_number != 1000:
+        print(f"Account Number: {acc_number}")
+        print(f"First Name: {bank_accounts[acc_number]['first_name']}")
+        print(f"Last Name: {bank_accounts[acc_number]['last_name']}")
+        print(f"Balance: {bank_accounts[acc_number]['balance']}")
+        print("Transaction History:")
+        for transaction in bank_accounts[acc_number]["transaction_history"]:
+            print(transaction)
+        print("Transactions to Execute:")
+        for transaction in bank_accounts[acc_number]["transactions_to_execute"]:
+            print(transaction)
+
+    # Special report for management account (account 1000)
+    elif acc_number == 1000:
+        for key, value in bank_accounts.items():  # Use .items() to iterate over both key and value
+            print(f"Account Number: {key}")
+            print(f"First Name: {value['first_name']}")
+            print(f"Last Name: {value['last_name']}")
+            print(f"Balance: {value['balance']}")
+            print("Transaction History:")
+            for transaction in value["transaction_history"]:
+                print(transaction)
+            print("Transactions to Execute:")
+            for transaction in value["transactions_to_execute"]:
+                print(transaction)
+            print()
+
+
 def check_balance(acc_number):
     balance = bank_accounts[acc_number]['balance']
     print(f"Your current balance is: ${balance:.2f}")
+
+
+def transaction_history(acc_number):
+    if acc_number == 1000:
+        for key, value in bank_accounts.items():
+            for transaction in value["transaction_history"]:
+                print(transaction)
 
 
 def make_transaction(acc_number):
@@ -206,8 +254,8 @@ def make_transaction(acc_number):
                     save_accounts_to_file()
                     print(f"Successfully transferred {amount} from Account {acc_number} to Account {recipient_acc_number}.")
                 case '2':
-                    scheduled_time = input("when would you like to make the transaction? ")
-                    schedule_transaction(acc_number, recipient_acc_number, amount,scheduled_time)
+                    scheduled_time = input("when would you like to make the transaction? %Y-%m-%d %H:%M:%S")
+                    schedule_transaction(acc_number, str(recipient_acc_number), amount,scheduled_time)
             return
         except ValueError:
             print("Invalid input. Please enter correct values.")
@@ -280,14 +328,13 @@ def check_transaction(acc_number):
         print("Invalid account number. Please try again.")
 
 
-def acc_report():
+def transaction_report():
     for key, value in bank_accounts.items():
         print(f"Account Number: {key}")
         print("Transactions to Execute:")
         for transaction in value["transactions_to_execute"]:
             print(transaction)
-        print()  # Add a blank line for better readability
-
+        print()
 
 
 account_ver()
